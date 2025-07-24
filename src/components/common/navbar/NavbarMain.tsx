@@ -5,6 +5,7 @@ import Sidebar from "./navComponent/Sidebar";
 import RegisterModal from "./navComponent/RegisterModel";
 import Logo from "./navComponent/Logo";
 import UserMenu from "./navComponent/UserMenu";
+import MobileNavbar from "./navComponent/PhoneView/MobileNavbar"; // 👈 import
 import axois from "@/axois";
 
 interface User {
@@ -53,40 +54,25 @@ const NavbarMain: React.FC = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
+      {/* Desktop Navbar */}
+      <header className="fixed top-0 left-0 w-full z-50 bg-white shadow-md md:block hidden">
         <div className="max-w-screen-xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
           <Logo scrolled={true} />
           <NavLinks scrolled={true} />
           <div className="flex items-center gap-4">
             {user ? (
-              <>
-                <UserMenu
-                  user={user}
-                  showDropdown={showProfileDropdown}
-                  setShowDropdown={setShowProfileDropdown}
-                  onLogout={handleLogout}
-                  scrolled={true}
-                  onOpenRegister={() => setShowRegisterModal(true)}
-                />
-
-                {/* Sidebar toggle for mobile */}
-                <button
-                  type="button"
-                  onClick={() => setSidebarOpen(true)}
-                  className="block md:hidden"
-                  aria-label="Open menu"
-                >
-                  <img
-                    src="https://img.icons8.com/ios-filled/50/000000/menu--v1.png"
-                    alt="menu"
-                    className="w-8 h-8"
-                  />
-                </button>
-              </>
+              <UserMenu
+                user={user}
+                showDropdown={showProfileDropdown}
+                setShowDropdown={setShowProfileDropdown}
+                onLogout={handleLogout}
+                scrolled={true}
+                onOpenRegister={() => setShowRegisterModal(true)}
+              />
             ) : (
               <button
                 onClick={() => navigate("/signin")}
-                className="text-sm px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
+                className="text-sm px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
               >
                 Sign In
               </button>
@@ -95,8 +81,10 @@ const NavbarMain: React.FC = () => {
         </div>
       </header>
 
-      <div className="h-20" />
+      {/* Mobile Bottom Navbar */}
+      <MobileNavbar user={user} onLogout={handleLogout} />
 
+      {/* Sidebar and Modal */}
       <Sidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {showRegisterModal && (
@@ -105,6 +93,9 @@ const NavbarMain: React.FC = () => {
           setUser={setUser}
         />
       )}
+
+      {/* Spacer for top navbar */}
+      <div className="h-20 md:h-0" />
     </>
   );
 };
