@@ -1,0 +1,18 @@
+.demo {
+  width: 22px;
+  height: 22px;
+  left: 5px;
+  top: 5px;
+  border-radius: 50px;
+  background: #618889;
+  border: 1px solid #618889;
+}
+.demomain {
+  width: 32px;
+  height: 32px;
+  left: 5px;
+  top: 5px;
+  border-radius: 50px;
+  background: transparent;
+  border: 1px solid #618889;
+}

@@ -1,0 +1,33 @@
+/* tslint:disable */
+/* eslint-disable */
+export const memory: WebAssembly.Memory;
+export const __wbg_message_free: (a: number, b: number) => void;
+export const __wbg_sendmessage_free: (a: number, b: number) => void;
+export const sendmessage_new: (a: number, b: number, c: number, d: number, e: number) => number;
+export const sendmessage_get_list_chats: (a: number) => any;
+export const get_user_info: () => any;
+export const get_summary_data: (a: number, b: number) => any;
+export const get_message_list: (a: number, b: number) => any;
+export const __wbg_hostel_free: (a: number, b: number) => void;
+export const __wbg_hostelincharge_free: (a: number, b: number) => void;
+export const __wbg_hostelmanagement_free: (a: number, b: number) => void;
+export const hostelmanagement_new: (a: any) => number;
+export const hostelmanagement_add_hostel: (a: number, b: any) => any;
+export const hostelmanagement_get_hostels: (a: number) => any;
+export const hostelmanagement_get_hostel_incharge: (a: number, b: number, c: number) => any;
+export const __wbg_phone_free: (a: number, b: number) => void;
+export const phone_new: (a: number, b: number, c: number, d: number, e: number, f: number) => number;
+export const phone_register: (a: number) => [number, number];
+export const phone_verify_otp: (a: number) => [number, number, number, number];
+export const __wbg_feature_free: (a: number, b: number) => void;
+export const __wbg_features_free: (a: number, b: number) => void;
+export const features_new: (a: number, b: number) => number;
+export const features_get_features: (a: number) => any;
+export const __wbindgen_exn_store: (a: number) => void;
+export const __externref_table_alloc: () => number;
+export const __wbindgen_export_2: WebAssembly.Table;
+export const __wbindgen_malloc: (a: number, b: number) => number;
+export const __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
+export const __wbindgen_free: (a: number, b: number, c: number) => void;
+export const __externref_table_dealloc: (a: number) => void;
+export const __wbindgen_start: () => void;

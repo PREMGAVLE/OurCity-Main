@@ -1,0 +1,43 @@
+name: Build Tauri Windows App
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Install WebView2 runtime
+        run: |
+          Invoke-WebRequest -Uri https://go.microsoft.com/fwlink/p/?LinkId=2124703 -OutFile MicrosoftEdgeWebview2Setup.exe
+          .\MicrosoftEdgeWebview2Setup.exe /silent /install
+
+      - name: Install frontend deps
+        run: npm install
+        working-directory: ./  # change if your frontend is in a subfolder
+
+      - name: Build frontend
+        run: npm run build
+        working-directory: ./  # change if your frontend is in a subfolder
+
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli
+
+      - name: Build Tauri App (Windows)
+        run: cargo tauri build

@@ -1,0 +1,30 @@
+.blueberrylight {
+    color: #5555AA;
+}
+
+.featuregray {
+    color: #b1b1b1;
+}
+
+/* .graylightest{
+    background: #F2F2F2;
+} */
+.smallbtn {
+    width: 110px;
+    height: 40px;
+    border-radius: 12px;
+    padding: 8px;
+}
+
+.largebtn {
+    width: 353px;
+    height: 52px;
+    border-radius: 12px;
+    padding: 8px;
+}
+.mediumbtn {
+    width: 353px;
+    height: 52px;
+    border-radius: 30px;
+    padding: 8px;
+}
