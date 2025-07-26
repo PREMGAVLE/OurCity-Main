@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+
 import {
   TrendingUp, Users, Building2, DollarSign,
   ArrowUpRight, ArrowDownRight
@@ -8,6 +8,8 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell
 } from 'recharts';
+import axios from '@/axois';
+// import axios from 'axios';
 
 interface StatItem {
   title: string;
@@ -33,7 +35,10 @@ const Overview: React.FC = () => {
             Expires: '0',
           },
         });
+         console.log(res.data);
         const data = res.data;
+        
+        
 
         setStats([
           {

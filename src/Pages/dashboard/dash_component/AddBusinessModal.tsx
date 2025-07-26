@@ -1,177 +1,282 @@
-"use client";
-
-import React, { useEffect,useState } from "react";
-
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-  DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import axios from "@/axois";
-// import axios from "axios";
+import toast from "react-hot-toast";
 
+interface AddBusinessModalProps {
+  open: boolean;
+  onClose: () => void;
+  fetchBusinesses: () => void;
+  initialData?: any;
+}
 
-type BusinessFormData = {
-  name: string;
-  description: string;
-  category: string;
-  address: string;
-  contact: string;
-};
+const AddBusinessModal: React.FC<AddBusinessModalProps> = ({
+  open,
+  onClose,
+  fetchBusinesses,
+  initialData = null,
+}) => {
+  const [categories, setCategories] = useState<Array<{ _id: string; name: string }>>([]);
+  const [subcategories, setSubcategories] = useState<Array<{ _id: string; name: string }>>([]);
+  const [loading, setLoading] = useState(false);
 
-
-
-type AddBusinessModalProps = {
-  onAddBusiness: (data: BusinessFormData) => void;
-};
-
-const AddBusinessModal: React.FC<AddBusinessModalProps> = ({ onAddBusiness }) => {
-  const [open, setOpen] = useState(false);
-
-  const [formData, setFormData] = useState<BusinessFormData>({
+  const [formData, setFormData] = useState({
     name: "",
-    description: "",
     category: "",
-    address: "",
-    contact: "",
+    subcategory: "",
+    description: "",
+    street: "",
+    city: "",
+    state: "",
+    pincode: "",
+    phone: "",
+    email: "",
+    facebook: "",
+    instagram: "",
   });
 
-  const [categories, setCategories] = useState([]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await axios.get("/category/getCategory",{
-            headers: {
-          "Cache-Control": "no-cache", // 🔄 Force fresh data
-        },
-
-        });
-           console.log("✅ API Response:", res);                  // Entire response
-      console.log("✅ Categories Array:", res.data.data); 
-        setCategories(res.data.data || []);
-        
-
-      } catch (err) {
-        console.error("Error fetching categories:", err);
-      }
-    };
-
+  useEffect(() => {
     if (open) fetchCategories();
 
-  }, [open]);
+    if (initialData) {
+      setFormData({
+        name: initialData.name || "",
+        category: initialData.category || "",
+        subcategory: initialData.subcategory || "",
+        description: initialData.description || "",
+        street: initialData.address?.street || "",
+        city: initialData.address?.city || "",
+        state: initialData.address?.state || "",
+        pincode: initialData.address?.pincode || "",
+        phone: initialData.contact?.phone || "",
+        email: initialData.contact?.email || "",
+        facebook: initialData.socialLinks?.facebook || "",
+        instagram: initialData.socialLinks?.instagram || "",
+      });
+      if (initialData.category) fetchSubcategories(initialData.category);
+    } else {
+      setFormData({
+        name: "",
+        category: "",
+        subcategory: "",
+        description: "",
+        street: "",
+        city: "",
+        state: "",
+        pincode: "",
+        phone: "",
+        email: "",
+        facebook: "",
+        instagram: "",
+      });
+    }
+  }, [open, initialData]);
 
-  const handleSubmit = () => {
-    onAddBusiness(formData);
-    setFormData({
-      name: "",
-      description: "",
-      category: "",
-      address: "",
-      contact: "",
-    });
-    setOpen(false);
+  const fetchCategories = async () => {
+    try {
+      const res = await axios.get("/category/getCategory");
+      setCategories(res.data?.data || []);
+    } catch (err) {
+      console.error("Failed to fetch categories:", err);
+    }
+  };
+
+  const fetchSubcategories = async (categoryId: string) => {
+    try {
+      const res = await axios.get(`/subcategory/getSubCategory/${categoryId}`);
+      setSubcategories(res.data?.result || []);
+    } catch (err) {
+      console.error("Failed to fetch subcategories:", err);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCategoryChange = async (value: string) => {
+    setFormData((prev) => ({ ...prev, category: value, subcategory: "" }));
+    await fetchSubcategories(value);
+  };
+
+  const handleSubcategoryChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, subcategory: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const userId = localStorage.getItem("userId");
+    if (!userId) return toast.error("User not logged in");
+
+    const payload = {
+      name: formData.name,
+      category: formData.category,
+      subcategory: formData.subcategory,
+      description: formData.description,
+      address: {
+        street: formData.street,
+        city: formData.city,
+        state: formData.state,
+        pincode: formData.pincode,
+      },
+      contact: {
+        phone: formData.phone,
+        email: formData.email,
+      },
+      socialLinks: {
+        facebook: formData.facebook,
+        instagram: formData.instagram,
+      },
+      owner: userId,
+    };
+
+    try {
+      setLoading(true);
+      if (initialData?._id) {
+        await axios.put(`/bussiness/updateBuss/${initialData._id}`, payload);
+        toast.success("Business updated successfully");
+      } else {
+        await axios.post("/bussiness/registerBuss", payload);
+        toast.success("Business registered successfully");
+      }
+      fetchBusinesses();
+      onClose();
+    } catch (err) {
+      console.error("Submit Error:", err);
+      toast.error("Something went wrong!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-primary text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-medium hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center text-sm sm:text-base">  <Plus className="w-4 h-4" /> Add New Business</Button>
-      </DialogTrigger>
-      <DialogContent className="w-full max-w-[100vw] sm:max-w-[700px]">
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl w-full overflow-y-auto max-h-[90vh] p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle>Add New Business</DialogTitle>
-          <DialogDescription>
-            Fill out the form to add a business to the list.
-          </DialogDescription>
+          <DialogTitle className="text-xl sm:text-2xl font-bold">
+            {initialData ? "Update Business" : "Add New Business"}
+          </DialogTitle>
+          <DialogDescription>Fill in the business details below.</DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="name">Business Name</Label>
-            <Input
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Enter business name"
-              required
-            />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label>Business Name</Label>
+              <Input name="name" value={formData.name} onChange={handleChange} required />
+            </div>
+            <div>
+              <Label>Category</Label>
+              <Select value={formData.category} onValueChange={handleCategoryChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat._id} value={cat._id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Subcategory</Label>
+              <Select value={formData.subcategory} onValueChange={handleSubcategoryChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select subcategory" />
+                </SelectTrigger>
+                <SelectContent>
+                  {subcategories.map((sub) => (
+                    <SelectItem key={sub._id} value={sub._id}>
+                      {sub.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="description">Description</Label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div>
+              <Label>Street</Label>
+              <Input name="street" value={formData.street} onChange={handleChange} />
+            </div>
+            <div>
+              <Label>City</Label>
+              <Input name="city" value={formData.city} onChange={handleChange} />
+            </div>
+            <div>
+              <Label>State</Label>
+              <Input name="state" value={formData.state} onChange={handleChange} />
+            </div>
+            <div>
+              <Label>Pincode</Label>
+              <Input name="pincode" value={formData.pincode} onChange={handleChange} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label>Phone</Label>
+              <Input name="phone" value={formData.phone} onChange={handleChange} />
+            </div>
+            <div>
+              <Label>Email</Label>
+              <Input type="email" name="email" value={formData.email} onChange={handleChange} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label>Facebook</Label>
+              <Input name="facebook" value={formData.facebook} onChange={handleChange} />
+            </div>
+            <div>
+              <Label>Instagram</Label>
+              <Input name="instagram" value={formData.instagram} onChange={handleChange} />
+            </div>
+          </div>
+
+          <div>
+            <Label>Description</Label>
             <Textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="Enter business description"
-              required
+              rows={4}
+              placeholder="Describe the business"
             />
           </div>
 
-            <select
-            // placeholder="Select Category"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md p-2 focus:outline-none"
-            required
-          >
-            <option value="">Select Category</option>
-            {categories.map((cat) => (
-              <option key={cat._id} value={cat._id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-
-          <div className="grid gap-2">
-            <Label htmlFor="address">Address</Label>
-            <Input
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              placeholder="Business address"
-              required
-            />
+          <div className="flex justify-end">
+            <Button type="submit" disabled={loading}>
+              {loading
+                ? "Submitting..."
+                : initialData
+                ? "Update Business"
+                : "Add Business"}
+            </Button>
           </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="contact">Contact</Label>
-            <Input
-              name="contact"
-              value={formData.contact}
-              onChange={handleChange}
-              placeholder="Phone or email"
-              required
-            />
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">
-            Save
-          </Button>
-        </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
