@@ -3,7 +3,7 @@ import axios from 'axios';
 import type { InternalAxiosRequestConfig } from 'axios'; // 👈 Correct type for interceptor config
 
 const instance = axios.create({
-  baseURL: 'https://burhanpur-city-backend-mfs4.onrender.com/api/',
+  baseURL: 'http://localhost:5000/api',
 });
 
 // Correctly typed interceptor

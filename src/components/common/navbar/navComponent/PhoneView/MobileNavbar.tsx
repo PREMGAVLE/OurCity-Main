@@ -123,7 +123,9 @@ const MobileNavbar: React.FC<Props> = ({ user, onLogout }) => {
           <div className="w-14" />
 
           <button
-            onClick={() => handleTabClick("Profile")}
+            // onClick={() => handleTabClick("Profile")}
+            
+            
             className={`flex flex-col items-center ${
               activeTab === "Profile"
                 ? "text-white bg-purple-700 p-2 rounded-xl"

@@ -8,7 +8,7 @@ import { Header } from './Header';
 import { Settings } from './Settings';
 import Overview from './Overview';
 import { LeadsManagement } from './LeadsManagement';
-import { BusinessListings } from './BusinessListings';
+import  {BusinessListings} from './BusinessListings';
 import { Messaging } from './Messaging';
  
 
